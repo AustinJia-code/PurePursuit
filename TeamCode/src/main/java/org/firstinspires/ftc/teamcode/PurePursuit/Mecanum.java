@@ -5,6 +5,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.qualcomm.robotcore.hardware.*;
 
+import org.firstinspires.ftc.teamcode.PurePursuit.Util.PID;
+import org.firstinspires.ftc.teamcode.PurePursuit.Util.Pose2D;
+
 public class Mecanum implements Subsystem {
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
     double y, x, rx, leftFrontPower, leftRearPower, rightFrontPower, rightRearPower, heading, rotX, rotY;
@@ -61,30 +64,29 @@ public class Mecanum implements Subsystem {
                 rotX = x * Math.cos(heading) - y * Math.sin(heading);
                 rotY = x * Math.sin(heading) + y * Math.cos(heading);
 
-                leftFrontPower = (rotY + rotX + rx);
-                leftRearPower = (rotY - rotX + rx);
-                rightFrontPower = (rotY - rotX - rx);
-                rightRearPower = (rotY + rotX - rx);
+                drive(rotX, rotY, rx);
                 break;
             case ROBOT:
-                leftFrontPower = (y + x + rx);
-                leftRearPower = (y - x + rx);
-                rightFrontPower = (y - x - rx);
-                rightRearPower = (y + x - rx);
+                drive(x, y, rx);
                 break;
         }
-        drive(leftFrontPower, leftRearPower, rightFrontPower, rightRearPower);
     }
-    public void auto(Pose2D targetPose, double speed, double sensitivity){
-        double headingError, xError, yError, sens;
+    public void auto(Pose2D currentPose, Pose2D targetPose, double speed, double sensitivity){
+        double headingError, xError, yError, sens, lateralError;
         double lateralTolerance = 0.5, headingTolerance = 2;
         this.targetPose = targetPose;
         this.speed = speed;
         sens = 12;
 
-        xError = (currentPose.getX() - targetPose.getX()) / sens;
-        yError = (currentPose.getY() - targetPose.getY()) / sens;
+        lateralError = Math.sqrt(
+                Math.pow((currentPose.getX() - targetPose.getX()), 2)
+                +
+                Math.pow((currentPose.getY() - targetPose.getY()), 2));
+
         headingError = (currentPose.getHeading() - targetPose.getHeading()) % 360;
+        xError = (lateralError * Math.cos(Math.toRadians(headingError))) / sens;
+        yError = (lateralError * Math.sin(Math.toRadians(headingError))) / sens;
+        headingError /= 180;
 
         if(xError * sens < lateralTolerance && yError * sens < lateralTolerance && headingError < headingTolerance){
             xController.reset();
@@ -96,9 +98,14 @@ public class Mecanum implements Subsystem {
             headingController.calculate(headingError);
         }
 
-        drive(xController.getOutput(), yController.getOutput(), headingController.getOutput(), speed);  
+        drive(xController.getOutput(), yController.getOutput(), headingController.getOutput());
     }
-    private void drive(double leftFrontPower, double leftRearPower, double rightFrontPower, double rightRearPower){
+    private void drive(double x, double y, double rx){
+        leftFrontPower = (y + x + rx);
+        leftRearPower = (y - x + rx);
+        rightFrontPower = (y - x - rx);
+        rightRearPower = (y + x - rx);
+
         leftFront.setPower(leftFrontPower * speed);
         leftRear.setPower(leftRearPower * speed);
         rightFront.setPower(rightFrontPower * speed);

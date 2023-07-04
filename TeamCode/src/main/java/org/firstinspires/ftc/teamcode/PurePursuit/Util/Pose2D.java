@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.PurePursuit;
+package org.firstinspires.ftc.teamcode.PurePursuit.Util;
 
 public class Pose2D {
     private double x, y, heading;
