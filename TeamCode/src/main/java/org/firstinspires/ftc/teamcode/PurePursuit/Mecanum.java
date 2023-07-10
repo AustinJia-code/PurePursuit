@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.PurePursuit;
 
+import static org.firstinspires.ftc.teamcode.PurePursuit.Constants.Mecanum.SENSITIVITY_IN;
+
 import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.qualcomm.robotcore.hardware.*;
+import com.vuforia.VirtualButton;
 
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.PID;
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.Pose2D;
@@ -71,12 +74,11 @@ public class Mecanum implements Subsystem {
                 break;
         }
     }
-    public void auto(Pose2D currentPose, Pose2D targetPose, double speed, double sensitivity){
+    public void auto(Pose2D currentPose, Pose2D targetPose, double speed){
         double headingError, xError, yError, sens, lateralError;
         double lateralTolerance = 0.5, headingTolerance = 2;
         this.targetPose = targetPose;
         this.speed = speed;
-        sens = 12;
 
         lateralError = Math.sqrt(
                 Math.pow((currentPose.getX() - targetPose.getX()), 2)
@@ -84,11 +86,11 @@ public class Mecanum implements Subsystem {
                 Math.pow((currentPose.getY() - targetPose.getY()), 2));
 
         headingError = (currentPose.getHeading() - targetPose.getHeading()) % 360;
-        xError = (lateralError * Math.cos(Math.toRadians(headingError))) / sens;
-        yError = (lateralError * Math.sin(Math.toRadians(headingError))) / sens;
+        xError = (lateralError * Math.cos(Math.toRadians(headingError))) / SENSITIVITY_IN;
+        yError = (lateralError * Math.sin(Math.toRadians(headingError))) / SENSITIVITY_IN;
         headingError /= 180;
 
-        if(xError * sens < lateralTolerance && yError * sens < lateralTolerance && headingError < headingTolerance){
+        if(xError * SENSITIVITY_IN < lateralTolerance && yError * SENSITIVITY_IN < lateralTolerance && headingError < headingTolerance){
             xController.reset();
             yController.reset();
             headingController.reset();

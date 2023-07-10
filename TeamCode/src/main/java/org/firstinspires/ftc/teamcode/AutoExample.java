@@ -14,6 +14,7 @@ public class AutoExample extends OpMode {
     @Override
     public void init() {
         drive = new Mecanum(hardwareMap);
+        localizer = new Localizer(hardwareMap, new Pose2D(0, 0, 0));
     }
 
     @Override
@@ -23,8 +24,12 @@ public class AutoExample extends OpMode {
 
     @Override
     public void loop() {
-        Pose2D target = new Pose2D(20, 20, 90);
-        drive.auto(localizer.getPoseEstimate(), target, 1, 12);
+        if(true) {
+            Pose2D target = new Pose2D(20, 20, 90);
+            drive.auto(localizer.getPoseEstimate(), target, 1);
+        }
+
+        localizer.update();
     }
 
     @Override
