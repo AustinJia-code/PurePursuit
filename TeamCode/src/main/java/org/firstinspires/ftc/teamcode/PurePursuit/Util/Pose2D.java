@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.PurePursuit.Util;
 
-public class Pose2D {
-    private double x, y, heading;
+public class Pose2D extends Point {
+    private double heading;
     public Pose2D(){
         this.x = 0;
         this.y = 0;

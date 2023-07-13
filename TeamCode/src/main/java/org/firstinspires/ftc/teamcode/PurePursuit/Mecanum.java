@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.PID;
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.Pose2D;
+import org.firstinspires.ftc.teamcode.PurePursuit.Util.Point;
 
 public class Mecanum implements Subsystem {
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
@@ -102,12 +103,12 @@ public class Mecanum implements Subsystem {
         drive(xController.getOutput(), yController.getOutput(), headingController.getOutput());
     }
 
-    public void autoToPoint(Pose2D currentPose, Pose2D targetPose, double speed){
+    public void autoToPoint(Pose2D currentPose, Point targetPose, double speed){
         double targetHeading = Math.atan((targetPose.getX() - currentPose.getX()) / (targetPose.getY() - currentPose.getY()));
 
         Pose2D newTarget = new Pose2D(targetPose.getX(), targetPose.getY(), targetHeading);
 
-        autoMimicPath(currentPose, targetPose, speed);
+        autoMimicPath(currentPose, newTarget, speed);
     }
 
     private void drive(double x, double y, double rx){
