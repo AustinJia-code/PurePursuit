@@ -6,7 +6,6 @@ import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.qualcomm.robotcore.hardware.*;
-import com.vuforia.VirtualButton;
 
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.PID;
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.Pose2D;
@@ -74,7 +73,7 @@ public class Mecanum implements Subsystem {
                 break;
         }
     }
-    public void auto(Pose2D currentPose, Pose2D targetPose, double speed){
+    public void autoMimicPath(Pose2D currentPose, Pose2D targetPose, double speed){
         double headingError, xError, yError, sens, lateralError;
         double lateralTolerance = 0.5, headingTolerance = 2;
         this.targetPose = targetPose;
@@ -102,6 +101,15 @@ public class Mecanum implements Subsystem {
 
         drive(xController.getOutput(), yController.getOutput(), headingController.getOutput());
     }
+
+    public void autoToPoint(Pose2D currentPose, Pose2D targetPose, double speed){
+        double targetHeading = Math.atan((targetPose.getX() - currentPose.getX()) / (targetPose.getY() - currentPose.getY()));
+
+        Pose2D newTarget = new Pose2D(targetPose.getX(), targetPose.getY(), targetHeading);
+
+        autoMimicPath(currentPose, targetPose, speed);
+    }
+
     private void drive(double x, double y, double rx){
         leftFrontPower = (y + x + rx);
         leftRearPower = (y - x + rx);

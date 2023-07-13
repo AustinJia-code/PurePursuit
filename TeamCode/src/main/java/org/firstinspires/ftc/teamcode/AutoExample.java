@@ -26,7 +26,7 @@ public class AutoExample extends OpMode {
     public void loop() {
         if(true) {
             Pose2D target = new Pose2D(20, 20, 90);
-            drive.auto(localizer.getPoseEstimate(), target, 1);
+            drive.autoMimicPath(localizer.getPoseEstimate(), target, 1);
         }
 
         localizer.update();
