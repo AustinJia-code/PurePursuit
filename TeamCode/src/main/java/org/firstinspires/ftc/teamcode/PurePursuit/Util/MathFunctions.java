@@ -41,7 +41,7 @@ public class MathFunctions {
             double minX = linePointOne.getX() < linePointTwo.getX() ? linePointOne.getX() : linePointTwo.getX();
             double maxX = linePointOne.getX() > linePointTwo.getX() ? linePointOne.getX() : linePointTwo.getX();
 
-            if(xRoot1 > minX && xRoot1 > maxX){
+            if(xRoot1 > minX && xRoot1 < maxX){
                 intersections.add(new Point(xRoot1, yRoot1));
             }
 
@@ -51,7 +51,7 @@ public class MathFunctions {
             xRoot2 += circleCenter.getX();
             yRoot2 += circleCenter.getY();
 
-            if(xRoot2 > minX && xRoot2 > maxX){
+            if(xRoot2 > minX && xRoot2 < maxX){
                 intersections.add(new Point(xRoot2, yRoot2));
             }
         }catch(Exception E){
