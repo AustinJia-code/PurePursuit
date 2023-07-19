@@ -32,7 +32,12 @@ public class Pose2D extends Point {
     }
     public void setPose(double x, double y, double heading){
         this.x = x;
-        this.y = x;
+        this.y = y;
         this.heading = heading;
+    }
+    public void setPose(Pose2D pose){
+        this.x = pose.x;
+        this.y = pose.y;
+        this.heading = pose.heading;
     }
 }

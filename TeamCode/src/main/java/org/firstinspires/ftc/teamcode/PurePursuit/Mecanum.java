@@ -7,9 +7,13 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.qualcomm.robotcore.hardware.*;
 
+import org.firstinspires.ftc.teamcode.PurePursuit.Util.CurvePoint;
+import org.firstinspires.ftc.teamcode.PurePursuit.Util.MathFunctions;
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.PID;
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.Pose2D;
 import org.firstinspires.ftc.teamcode.PurePursuit.Util.Point;
+
+import java.util.ArrayList;
 
 public class Mecanum implements Subsystem {
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
@@ -74,11 +78,10 @@ public class Mecanum implements Subsystem {
                 break;
         }
     }
-    public void autoMimicPath(Pose2D currentPose, Pose2D targetPose, double speed){
+    public void autoMimicPath(Pose2D targetPose, double speed, double turnSpeed){
         double headingError, xError, yError, sens, lateralError;
         double lateralTolerance = 0.5, headingTolerance = 2;
         this.targetPose = targetPose;
-        this.speed = speed;
 
         lateralError = Math.sqrt(
                 Math.pow((currentPose.getX() - targetPose.getX()), 2)
@@ -100,15 +103,15 @@ public class Mecanum implements Subsystem {
             headingController.calculate(headingError);
         }
 
-        drive(xController.getOutput(), yController.getOutput(), headingController.getOutput());
+        drive(xController.getOutput() * speed, yController.getOutput() * speed, headingController.getOutput() * turnSpeed);
     }
 
-    public void autoToPoint(Pose2D currentPose, Point targetPose, double speed){
+    public void autoToPoint(Point targetPose, double speed, double turnSpeed){
         double targetHeading = Math.atan((targetPose.getX() - currentPose.getX()) / (targetPose.getY() - currentPose.getY()));
 
         Pose2D newTarget = new Pose2D(targetPose.getX(), targetPose.getY(), targetHeading);
 
-        autoMimicPath(currentPose, newTarget, speed);
+        autoMimicPath(newTarget, speed, turnSpeed);
     }
 
     private void drive(double x, double y, double rx){
@@ -117,15 +120,47 @@ public class Mecanum implements Subsystem {
         rightFrontPower = (y - x - rx);
         rightRearPower = (y + x - rx);
 
-        leftFront.setPower(leftFrontPower * speed);
-        leftRear.setPower(leftRearPower * speed);
-        rightFront.setPower(rightFrontPower * speed);
-        rightRear.setPower(rightRearPower * speed);
+        leftFront.setPower(leftFrontPower);
+        leftRear.setPower(leftRearPower);
+        rightFront.setPower(rightFrontPower);
+        rightRear.setPower(rightRearPower);
+    }
+    public CurvePoint getFollowPointPath(ArrayList<CurvePoint> pathPoints, Point robotLocation, double followRadius){
+        CurvePoint followMe = new CurvePoint((pathPoints.get(0)));
+
+        for(int i = 0; i < pathPoints.size() - 1; i++){
+            CurvePoint startLine = pathPoints.get(i);
+            CurvePoint endLine = pathPoints.get(i+1);
+
+            ArrayList<Point> intersections = MathFunctions.lineCircleIntersection(robotLocation, followRadius, startLine.toPoint(), endLine.toPoint());
+
+            double closestAngle = Double.MAX_VALUE;
+
+            for(Point thisIntersection : intersections){
+                double angle = Math.atan2(thisIntersection.getY() - y, thisIntersection.getX() - x);
+                double deltaAngle = Math.abs(MathFunctions.AngleWrapRad(angle - Math.toRadians(heading)));
+
+                if(deltaAngle < closestAngle){
+                    closestAngle = deltaAngle;
+                    followMe.setPoint(thisIntersection);
+                }
+            }
+        }
+        return followMe;
+    }
+    public void followCurve(ArrayList<CurvePoint> allPoints, double followAngle){
+        CurvePoint followMe = getFollowPointPath(allPoints, new Point(x, y), allPoints.get(0).followDistance);
+
+        autoToPoint(followMe.toPoint(), followMe.moveSpeed, followMe.turnSpeed);
     }
     public double getHeading(){
         return imu.getHeading();
     }
     public void setSpeed(double speed){
         this.speed = speed;
+    }
+
+    public void setPoseEstimate(Pose2D poseEstimate){
+        currentPose.setPose(poseEstimate);
     }
 }

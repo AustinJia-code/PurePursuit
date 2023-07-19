@@ -31,4 +31,13 @@ public class CurvePoint {
         slowDownTurnRadians = thisPoint.slowDownTurnRadians;
         slowDownTurnAmount = thisPoint.slowDownTurnAmount;
     }
+
+    public Point toPoint(){
+        return new Point(x, y);
+    }
+
+    public void setPoint(Point point) {
+        this.x = point.getX();
+        this.y = point.getY();
+    }
 }

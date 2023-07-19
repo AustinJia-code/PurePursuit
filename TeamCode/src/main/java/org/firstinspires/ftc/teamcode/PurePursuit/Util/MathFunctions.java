@@ -60,4 +60,15 @@ public class MathFunctions {
 
         return intersections;
     }
+
+    public static double AngleWrapRad(double angle){
+        while(angle < -Math.PI) angle += 2*Math.PI;
+        while(angle > Math.PI) angle -= 2*Math.PI;
+
+        return angle;
+    }
+
+    public static double AngleWrapDeg(double angle){
+        return Math.toDegrees(AngleWrapRad(Math.toRadians(angle)));
+    }
 }
