@@ -55,4 +55,16 @@ public class Localizer {
 
         poseEstimate.setPose(xPosition, yPosition, heading);
     }
+
+    public double getxPosition() {
+        return xPosition;
+    }
+
+    public double getyPosition() {
+        return yPosition;
+    }
+
+    public double getHeading() {
+        return heading;
+    }
 }

@@ -19,6 +19,7 @@ public class Mecanum implements Subsystem {
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
     double y, x, rx, leftFrontPower, leftRearPower, rightFrontPower, rightRearPower, heading, rotX, rotY;
     PID xController, yController, headingController;
+    boolean atTarget;
     Pose2D currentPose, targetPose;
     private RevIMU imu;
     private Mode mode;
@@ -80,7 +81,7 @@ public class Mecanum implements Subsystem {
     }
     public void autoMimicPath(Pose2D targetPose, double speed, double turnSpeed){
         double headingError, xError, yError, sens, lateralError;
-        double lateralTolerance = 0.5, headingTolerance = 2;
+        double lateralTolerance = 0.5, headingTolerance = 2.0 / 180;
         this.targetPose = targetPose;
 
         lateralError = Math.sqrt(
@@ -97,10 +98,12 @@ public class Mecanum implements Subsystem {
             xController.reset();
             yController.reset();
             headingController.reset();
+            atTarget = true;
         }else {
             xController.calculate(xError);
             yController.calculate(yError);
             headingController.calculate(headingError);
+            atTarget = false;
         }
 
         drive(xController.getOutput() * speed, yController.getOutput() * speed, headingController.getOutput() * turnSpeed);
@@ -158,6 +161,26 @@ public class Mecanum implements Subsystem {
     }
     public void setSpeed(double speed){
         this.speed = speed;
+    }
+    public boolean atTarget(){ return atTarget; }
+    public boolean atTarget(Pose2D target){
+        double headingError, xError, yError, lateralError;
+        double lateralTolerance = 0.5, headingTolerance = 2.0 / 180;
+
+        lateralError = Math.sqrt(
+                Math.pow((currentPose.getX() - target.getX()), 2)
+                        +
+                        Math.pow((currentPose.getY() - target.getY()), 2));
+
+        headingError = (currentPose.getHeading() - target.getHeading()) % 360;
+        xError = (lateralError * Math.cos(Math.toRadians(headingError))) / SENSITIVITY_IN;
+        yError = (lateralError * Math.sin(Math.toRadians(headingError))) / SENSITIVITY_IN;
+        headingError /= 180;
+
+        if(xError * SENSITIVITY_IN < lateralTolerance && yError * SENSITIVITY_IN < lateralTolerance && headingError < headingTolerance){
+            return true;
+        }
+        return false;
     }
 
     public void setPoseEstimate(Pose2D poseEstimate){

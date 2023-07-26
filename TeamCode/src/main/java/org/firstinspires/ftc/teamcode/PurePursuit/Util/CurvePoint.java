@@ -35,6 +35,7 @@ public class CurvePoint {
     public Point toPoint(){
         return new Point(x, y);
     }
+    //public Pose2D toPose2D() { return new Pose2D(x, y, heading); }
 
     public void setPoint(Point point) {
         this.x = point.getX();

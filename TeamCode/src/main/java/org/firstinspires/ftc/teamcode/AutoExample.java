@@ -14,18 +14,18 @@ import java.util.ArrayList;
 public class AutoExample extends OpMode {
     Mecanum drive;
     Localizer localizer;
-    ArrayList<CurvePoint> allPoints;
+    ArrayList<CurvePoint> curve1;
     @Override
     public void init() {
         drive = new Mecanum(hardwareMap);
         localizer = new Localizer(hardwareMap, new Pose2D(0, 0, 0));
 
-        allPoints = new ArrayList<>();
+        curve1 = new ArrayList<>();
 
-        allPoints.add(new CurvePoint(0, 0, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
-        allPoints.add(new CurvePoint(180, 180, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
-        allPoints.add(new CurvePoint(220, 180, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
-        allPoints.add(new CurvePoint(280, 50, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
+        curve1.add(new CurvePoint(0, 0, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
+        curve1.add(new CurvePoint(180, 180, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
+        curve1.add(new CurvePoint(220, 180, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
+        curve1.add(new CurvePoint(280, 50, 1.0, 1.0, 90, Math.toRadians(90), 1.0, 1.0));
     }
 
     @Override
@@ -35,10 +35,15 @@ public class AutoExample extends OpMode {
 
     @Override
     public void loop() {
-        drive.followCurve(allPoints, Math.toRadians(90));
+        if(drive.atTarget(new Pose2D(280, 50, localizer.getHeading()))) {
+            telemetry.addData("at: ", "target");
+        }else{
+            drive.followCurve(curve1, Math.toRadians(90));
+        }
 
         localizer.update();
         drive.setPoseEstimate(localizer.getPoseEstimate());
+
     }
 
     @Override
