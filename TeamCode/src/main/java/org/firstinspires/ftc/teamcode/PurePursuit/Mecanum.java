@@ -80,7 +80,7 @@ public class Mecanum implements Subsystem {
         }
     }
     public void autoMimicPath(Pose2D targetPose, double speed, double turnSpeed){
-        double headingError, xError, yError, sens, lateralError;
+        double headingError, xError, yError, lateralError;
         double lateralTolerance = 0.5, headingTolerance = 2.0 / 180;
         this.targetPose = targetPose;
 
